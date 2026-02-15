@@ -66,16 +66,17 @@ class Movie extends Model
         return $this->hasMany(Star::class);
     }
 
-
-    public function getPosterUrlAttribute(): ?string
+    /**
+     * Get the poster url for the movie.
+     * @param string $size The size of the poster. Default is 'medium'.
+     * @return string|null The poster url.
+     */
+    public function getPosterUrl(string $size = 'medium'): ?string
     {
-        return $this->buildPosterUrl();
-    }
+        $sizeValue = self::POSTER_SIZES[$size] ?? self::DEFAULT_POSTER_SIZE;
 
-    private function buildPosterUrl(string $size = self::DEFAULT_POSTER_SIZE): ?string
-    {
         return $this->poster_path
-            ? self::IMAGE_BASE_URL . $size . $this->poster_path
+            ? self::IMAGE_BASE_URL . $sizeValue . $this->poster_path
             : null;
     }
 }

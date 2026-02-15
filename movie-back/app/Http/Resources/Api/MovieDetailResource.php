@@ -20,7 +20,7 @@ class MovieDetailResource extends JsonResource
             'description' => $this->description,
             'release_date' => $this->release_date?->format('Y-m-d'),
             'poster_url' => $this->img_url,
-            'average_rating' => round((float) $this->average_rating, 1),
+            'average_rating' => round((float) ($this->stars_avg_rating ?? 0), 1),
             'ratings_count' => $this->when(
                 $this->relationLoaded('stars'),
                 fn () => $this->stars->count()

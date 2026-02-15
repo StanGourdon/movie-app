@@ -21,7 +21,7 @@ class MovieController extends Controller
     public function index(Request $request): JsonResponse
     {
         $movies = Movie::query()
-            ->withAggregate('stars', 'avg(rating) as average_rating')
+            ->withAvg('stars', 'rating')
             ->orderBy('release_date', 'desc')
             ->paginate(15);
 
@@ -39,7 +39,7 @@ class MovieController extends Controller
         $movie->load([
             'comments.user',
             'stars.user',
-        ])->loadAggregate('stars', 'avg(rating) as average_rating');
+        ])->loadAvg('stars', 'rating');
 
         return (new MovieDetailResource($movie))
             ->response()
@@ -53,9 +53,6 @@ class MovieController extends Controller
     public function rate(RateMovieRequest $request, Movie $movie): JsonResponse
     {
         $user = $request->user();
-        if (! $user) {
-            return response()->json(['message' => 'Unauthenticated.'], 401);
-        }
 
         Star::updateOrCreate(
             [
