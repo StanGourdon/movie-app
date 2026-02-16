@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
-import { apiService } from '../services/api';
-import type { Movie, MovieDetail, PaginatedResponse } from '../types/movie';
+import type { Movie, MovieDetail, PaginatedResponse } from '../types/movie.types';
+import { moviesApi } from '../services/moviesApi';
 
 interface UseMoviesReturn {
   movies: Movie[];
@@ -27,7 +27,7 @@ export const useMovies = (initialPage: number = 1): UseMoviesReturn => {
     try {
       setLoading(true);
       setError(null);
-      const response: PaginatedResponse<Movie> = await apiService.getMovies(page);
+      const response: PaginatedResponse<Movie> = await moviesApi.getMovies(page);  
       setMovies(response.data);
       setPagination({
         currentPage: response.current_page,
@@ -78,7 +78,7 @@ export const useMovieDetail = (movieId: number): UseMovieDetailReturn => {
     try {
       setLoading(true);
       setError(null);
-      const data = await apiService.getMovieById(movieId);
+      const data = await moviesApi.getMovieById(movieId);
       setMovie(data);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur lors du chargement du film');

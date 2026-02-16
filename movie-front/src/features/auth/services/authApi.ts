@@ -1,15 +1,8 @@
-import axios, { AxiosInstance, AxiosError } from 'axios';
-import { API_BASE_URL, API_ENDPOINTS } from '../config/api';
-import type {
-  Movie,
-  MovieDetail,
-  PaginatedResponse,
-  RateMovieRequest,
-  LoginRequest,
-  LoginResponse,
-} from '../types/movie';
+import axios, { type AxiosInstance, type AxiosError } from 'axios';
+import { API_BASE_URL, API_ENDPOINTS } from '../../../config/api.ts';
+import type { LoginRequest, LoginResponse } from '../types/auth.types.ts';
 
-class ApiService {
+class AuthApi {
   private client: AxiosInstance;
 
   constructor() {
@@ -47,28 +40,6 @@ class ApiService {
     );
   }
 
-  // Movies API
-  async getMovies(page: number = 1): Promise<PaginatedResponse<Movie>> {
-    const response = await this.client.get<PaginatedResponse<Movie>>(
-      API_ENDPOINTS.movies.list,
-      {
-        params: { page },
-      }
-    );
-    return response.data;
-  }
-
-  async getMovieById(id: number): Promise<MovieDetail> {
-    const response = await this.client.get<MovieDetail>(
-      API_ENDPOINTS.movies.detail(id)
-    );
-    return response.data;
-  }
-
-  async rateMovie(id: number, data: RateMovieRequest): Promise<void> {
-    await this.client.post(API_ENDPOINTS.movies.rate(id), data);
-  }
-
   // Auth API
   async login(credentials: LoginRequest): Promise<LoginResponse> {
     const response = await this.client.post<LoginResponse>(
@@ -93,4 +64,4 @@ class ApiService {
   }
 }
 
-export const apiService = new ApiService();
+export const authApi = new AuthApi();
