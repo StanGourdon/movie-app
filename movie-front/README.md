@@ -1,73 +1,94 @@
-# React + TypeScript + Vite
+# Movie Front - React + TypeScript + Tailwind CSS
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Application frontend React pour l'application Movie App.
 
-Currently, two official plugins are available:
+## 🚀 Installation
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+# Installer les dépendances
+npm install
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# Ou avec yarn
+yarn install
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## ⚙️ Configuration
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+1. Copier le fichier `.env.example` vers `.env` :
+```bash
+cp .env.example .env
 ```
+
+2. Configurer l'URL de l'API backend dans `.env` :
+```
+VITE_API_BASE_URL=http://localhost:8000/api
+```
+
+## 🏃 Développement
+
+```bash
+# Démarrer le serveur de développement
+npm run dev
+
+# Ou avec yarn
+yarn dev
+```
+
+L'application sera accessible sur `http://localhost:5173` (ou le port indiqué par Vite).
+
+## 📦 Build
+
+```bash
+# Build pour la production
+npm run build
+
+# Prévisualiser le build
+npm run preview
+```
+
+## 🏗️ Structure du projet
+
+```
+src/
+├── components/          # Composants React
+│   ├── MovieCard.tsx   # Carte d'un film
+│   ├── MovieList.tsx   # Liste des films
+│   ├── LoadingSpinner.tsx
+│   └── ErrorMessage.tsx
+├── config/             # Configuration
+│   └── api.ts         # Configuration API et endpoints
+├── hooks/             # Hooks React personnalisés
+│   └── useMovies.ts   # Hook pour gérer les films
+├── services/          # Services API
+│   └── api.ts        # Service API avec axios
+├── types/            # Types TypeScript
+│   └── movie.ts      # Types pour les films
+└── App.tsx           # Composant principal
+```
+
+## 🔌 API
+
+Le service API est configuré dans `src/services/api.ts` et utilise :
+- **Axios** pour les requêtes HTTP
+- **Intercepteurs** pour gérer l'authentification (token Bearer)
+- **Gestion automatique** des erreurs 401 (déconnexion)
+
+### Endpoints disponibles
+
+- `GET /api/movies` - Liste paginée des films
+- `GET /api/movies/:id` - Détails d'un film
+- `POST /api/movies/:id/rate` - Noter un film (authentification requise)
+- `POST /api/login` - Connexion
+- `POST /api/logout` - Déconnexion
+
+## 🎨 Tailwind CSS
+
+Tailwind CSS est configuré et prêt à l'emploi. Vous pouvez utiliser toutes les classes Tailwind dans vos composants.
+
+## 📝 Prochaines étapes
+
+1. Installer les dépendances : `npm install`
+2. Configurer l'URL de l'API dans `.env`
+3. Démarrer le backend Laravel sur `http://localhost:8000`
+4. Démarrer le frontend : `npm run dev`
+5. Développer l'interface graphique à partir de la maquette Figma
