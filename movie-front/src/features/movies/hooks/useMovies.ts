@@ -6,59 +6,45 @@ interface UseMoviesReturn {
   movies: Movie[];
   loading: boolean;
   error: string | null;
-  pagination: {
-    currentPage: number;
-    lastPage: number;
-    total: number;
-    perPage: number;
-  } | null;
-  fetchMovies: (page?: number) => Promise<void>;
-  refreshMovies: () => Promise<void>;
+  currentPage: number;
+  lastPage: number;
+  setPage: (page: number) => void;
 }
 
 export const useMovies = (initialPage: number = 1): UseMoviesReturn => {
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [pagination, setPagination] = useState<UseMoviesReturn['pagination']>(null);
   const [currentPage, setCurrentPage] = useState<number>(initialPage);
+  const [lastPage, setLastPage] = useState<number>(1);
 
-  const fetchMovies = useCallback(async (page: number = currentPage) => {
+  const fetchMovies = useCallback(async (page: number) => {
     try {
       setLoading(true);
       setError(null);
-      const response: PaginatedResponse<Movie> = await moviesApi.getMovies(page);  
+      const response: PaginatedResponse<Movie> = await moviesApi.getMovies(page);
       setMovies(response.data);
-      setPagination({
-        currentPage: response.current_page,
-        lastPage: response.last_page,
-        total: response.total,
-        perPage: response.per_page,
-      });
-      setCurrentPage(response.current_page);
+      setCurrentPage(response.meta.current_page);
+      setLastPage(response.meta.last_page);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Erreur lors du chargement des films');
       setMovies([]);
     } finally {
       setLoading(false);
     }
-  }, [currentPage]);
-
-  const refreshMovies = useCallback(async () => {
-    await fetchMovies(currentPage);
-  }, [fetchMovies, currentPage]);
+  }, []);
 
   useEffect(() => {
-    fetchMovies(initialPage);
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    fetchMovies(currentPage);
+  }, [currentPage, fetchMovies]);
 
   return {
     movies,
     loading,
     error,
-    pagination,
-    fetchMovies,
-    refreshMovies,
+    currentPage,
+    lastPage,
+    setPage: setCurrentPage,
   };
 };
 

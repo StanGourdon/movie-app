@@ -1,16 +1,19 @@
 import { HomePage } from "../pages/HomePage";
+import { Footer } from "../shared/components/layout/Footer";
+import { Navbar } from "../shared/components/layout/Navbar";
 
 function App() {
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <h1 className="text-3xl font-bold text-gray-900">Movie App</h1>
-        </div>
+      <header className="bg-primary h-28 border-b-4 border-quaternary">
+        <Navbar />
       </header>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="min-h-screen">
         <HomePage />
       </main>
+      <footer className="bg-white shadow-sm">
+        <Footer />
+      </footer>
     </div>
   );
 }

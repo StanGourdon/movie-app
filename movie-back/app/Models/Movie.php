@@ -7,14 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 class Movie extends Model
 {
     private const IMAGE_BASE_URL = 'https://image.tmdb.org/t/p/';
-    private const DEFAULT_POSTER_SIZE = 'w500';
+    private const DEFAULT_POSTER_SIZE = 'w500/';
     private const SIZE_POSTER = [
-        'miniature' => 'w92',
-        'small' => 'w185',
-        'medium' => 'w342',
-        'large' => 'w500',
-        'extra_large' => 'w780',
-        'original' => 'original',
+        'miniature' => 'w92/',
+        'small' => 'w185/',
+        'medium' => 'w342/',
+        'large' => 'w500/',
+        'extra_large' => 'w780/',
+        'original' => 'original/',
     ];
 
     /**
