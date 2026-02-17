@@ -1,4 +1,5 @@
 import type { Movie, MovieDetail } from '../types/movie.types';
+import { useAuth } from '../../auth/hooks/useAuth';
 
 const MAX_STARS = 5;
 
@@ -41,6 +42,9 @@ export const MovieDetailModal = ({
   onAddComment,
 }: MovieDetailModalProps) => {
   if (!isOpen || !movie) return null;
+
+  const { isAuthenticated } = useAuth();
+  const authenticated = isAuthenticated();
 
   const movieToDisplay = (fullMovie ?? movie) as Movie | MovieDetail;
   const description =
@@ -135,7 +139,7 @@ export const MovieDetailModal = ({
                   </p>
                 )}
 
-                {onAddComment && (
+                {onAddComment && authenticated && (
                   <button
                     type="button"
                     onClick={onAddComment}
