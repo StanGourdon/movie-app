@@ -21,7 +21,7 @@ export const MovieGrid = ({
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [isAddCommentOpen, setIsAddCommentOpen] = useState(false);
 
-  const { fullMovie, loadingDetail, selectMovie, clearSelection } = useMovieDetail();
+  const { fullMovie, loadingDetail, selectMovie, refreshMovie, clearSelection } = useMovieDetail();
 
   const openDetail = (movie: Movie) => {
     setSelectedMovie(movie);
@@ -101,7 +101,12 @@ export const MovieGrid = ({
         />
       )}
 
-      <AddCommentModal isOpen={isAddCommentOpen} onClose={closeAddComment} />
+      <AddCommentModal
+        isOpen={isAddCommentOpen}
+        onClose={closeAddComment}
+        movieId={selectedMovie?.id ?? null}
+        onSuccess={() => selectedMovie != null && void refreshMovie(selectedMovie.id)}
+      />
     </>
   );
 };

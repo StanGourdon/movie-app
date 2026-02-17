@@ -53,6 +53,7 @@ interface UseMovieDetailReturn {
   loadingDetail: boolean;
   errorDetail: string | null;
   selectMovie: (id: number) => Promise<void>;
+  refreshMovie: (id: number) => Promise<void>;
   clearSelection: () => void;
 }
 
@@ -87,9 +88,22 @@ export const useMovieDetail = (): UseMovieDetailReturn => {
     }
   }, [fullMovie]);
 
+  const refreshMovie = useCallback(async (id: number) => {
+    try {
+      setLoadingDetail(true);
+      setErrorDetail(null);
+      const data = await moviesApi.getMovieById(id);
+      setFullMovie(data);
+    } catch (err) {
+      setErrorDetail(
+        err instanceof Error ? err.message : 'Erreur lors du chargement du film'
+      );
+    } finally {
+      setLoadingDetail(false);
+    }
+  }, []);
+
   const clearSelection = useCallback(() => {
-    // On garde fullMovie en mémoire pour éviter un rechargement immédiat
-    // si l'utilisateur rouvre le même film. On ne remet donc pas fullMovie à null ici.
     setErrorDetail(null);
   }, []);
 
@@ -98,6 +112,7 @@ export const useMovieDetail = (): UseMovieDetailReturn => {
     loadingDetail,
     errorDetail,
     selectMovie,
+    refreshMovie,
     clearSelection,
   };
 };
