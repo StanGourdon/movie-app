@@ -3,6 +3,7 @@ import type { Movie } from '../types/movie.types';
 import { MovieCard } from './MovieCard';
 import { MovieDetailModal } from './MovieDetailModal';
 import { AddCommentModal } from './AddCommentModal';
+import { useMovieDetail } from '../hooks/useMovies';
 
 export interface MovieGridProps {
   movies: Movie[];
@@ -20,8 +21,17 @@ export const MovieGrid = ({
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [isAddCommentOpen, setIsAddCommentOpen] = useState(false);
 
-  const openDetail = (movie: Movie) => setSelectedMovie(movie);
-  const closeDetail = () => setSelectedMovie(null);
+  const { fullMovie, loadingDetail, selectMovie, clearSelection } = useMovieDetail();
+
+  const openDetail = (movie: Movie) => {
+    setSelectedMovie(movie);
+    void selectMovie(movie.id);
+  };
+
+  const closeDetail = () => {
+    setSelectedMovie(null);
+    clearSelection();
+  };
   const openAddComment = () => setIsAddCommentOpen(true);
   const closeAddComment = () => setIsAddCommentOpen(false);
 
@@ -83,7 +93,9 @@ export const MovieGrid = ({
       {selectedMovie && (
         <MovieDetailModal
           movie={selectedMovie}
+          fullMovie={fullMovie}
           isOpen={!!selectedMovie}
+          loadingDetail={loadingDetail}
           onClose={closeDetail}
           onAddComment={openAddComment}
         />

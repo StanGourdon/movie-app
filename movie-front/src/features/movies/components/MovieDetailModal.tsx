@@ -1,9 +1,10 @@
-import type { Movie } from '../types/movie.types';
+import type { Movie, MovieDetail } from '../types/movie.types';
 
 const MAX_STARS = 5;
 
 function StarRating({ rating }: { rating: number }) {
-  const value = Math.min(MAX_STARS, Math.max(0, Math.round(rating)));
+  const num = Number(rating);
+  const value = Math.min(MAX_STARS, Math.max(0, Math.round(Number.isNaN(num) ? 0 : num)));
   return (
     <div className="flex gap-0.5" aria-label={`Note : ${value} sur ${MAX_STARS}`}>
       {Array.from({ length: MAX_STARS }, (_, i) => (
@@ -15,27 +16,48 @@ function StarRating({ rating }: { rating: number }) {
           ★
         </span>
       ))}
-      <span className="ml-2 text-gray-600 text-sm">({rating.toFixed(1)})</span>
+      <span className="ml-2 text-gray-600 text-sm">
+        ({Number.isNaN(num) ? '0.0' : num.toFixed(1)})
+      </span>
     </div>
   );
 }
 
 export interface MovieDetailModalProps {
-  movie: Movie;
+  movie: Movie | null;
+  fullMovie?: MovieDetail | null;
   isOpen: boolean;
+  loadingDetail?: boolean;
   onClose: () => void;
   onAddComment?: () => void;
 }
 
 export const MovieDetailModal = ({
   movie,
+  fullMovie,
   isOpen,
+  loadingDetail = false,
   onClose,
   onAddComment,
 }: MovieDetailModalProps) => {
-  if (!isOpen) return null;
+  if (!isOpen || !movie) return null;
 
-  const description = 'description' in movie ? (movie as Movie & { description?: string | null }).description : null;
+  const movieToDisplay = (fullMovie ?? movie) as Movie | MovieDetail;
+  const description =
+    fullMovie && 'description' in fullMovie
+      ? (fullMovie as MovieDetail).description ?? null
+      : null;
+
+  // Laravel peut renvoyer comments sous la forme { data: [...] } ; sinon tableau ou undefined
+  const commentsList = ((): Array<{ id: number; user_name: string; content: string; created_at: string }> => {
+    if (!fullMovie) return [];
+    const c = fullMovie.comments as unknown;
+    if (Array.isArray(c)) return c;
+    if (c && typeof c === 'object' && Array.isArray((c as { data?: unknown[] }).data)) {
+      return (c as { data: Array<{ id: number; user_name: string; content: string; created_at: string }> }).data;
+    }
+    return [];
+  })();
 
   return (
     <div
@@ -54,36 +76,75 @@ export const MovieDetailModal = ({
         <div className="flex flex-col sm:flex-row gap-4 p-6">
           <div className="flex-shrink-0 w-full sm:w-48 aspect-[2/3] rounded-lg overflow-hidden bg-gray-200">
             <img
-              src={movie.poster_url ?? 'https://via.placeholder.com/300x450?text=No+poster'}
-              alt={`Affiche de ${movie.title}`}
+              src={movieToDisplay.poster_url ?? 'https://via.placeholder.com/300x450?text=No+poster'}
+              alt={`Affiche de ${movieToDisplay.title}`}
               className="w-full h-full object-cover"
             />
           </div>
           <div className="flex-1 min-w-0">
             <h2 id="movie-detail-title" className="text-xl font-bold text-gray-900">
-              {movie.title}
+              {movieToDisplay.title}
             </h2>
-            {movie.release_date && (
+            {movieToDisplay.release_date && (
               <p className="text-sm text-gray-500 mt-1">
-                {new Date(movie.release_date).getFullYear()}
+                {new Date(movieToDisplay.release_date).getFullYear()}
               </p>
             )}
             <div className="mt-2">
-              <StarRating rating={movie.average_rating} />
+              <StarRating rating={Number(movieToDisplay.average_rating) || 0} />
             </div>
-            {description && (
-              <p className="mt-3 text-gray-700 text-sm leading-relaxed">
-                {description}
-              </p>
-            )}
-            {onAddComment && (
-              <button
-                type="button"
-                onClick={onAddComment}
-                className="mt-4 py-2 px-4 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-              >
-                Ajouter un commentaire
-              </button>
+            {loadingDetail ? (
+              <div className="mt-6 flex h-20 items-center justify-center">
+                <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-500 border-t-transparent" />
+              </div>
+            ) : (
+              <>
+                {description && (
+                  <p className="mt-3 text-gray-700 text-sm leading-relaxed">
+                    {description}
+                  </p>
+                )}
+
+                {commentsList.length > 0 ? (
+                  <div className="mt-4">
+                    <h3 className="text-sm font-semibold text-gray-900">
+                      Commentaires
+                    </h3>
+                    <ul className="mt-2 space-y-2 text-sm text-gray-700">
+                      {commentsList.map((comment) => (
+                        <li
+                          key={comment.id}
+                          className="rounded-md bg-gray-50 px-3 py-2"
+                        >
+                          <p className="font-medium text-gray-900">
+                            {comment.user_name ?? 'Anonyme'}
+                          </p>
+                          <p className="text-xs text-gray-500">
+                            {comment.created_at
+                              ? new Date(comment.created_at).toLocaleDateString()
+                              : ''}
+                          </p>
+                          <p className="mt-1 text-gray-700">{comment.content ?? ''}</p>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : (
+                  <p className="mt-3 text-sm text-gray-500">
+                    Aucun commentaire pour le moment.
+                  </p>
+                )}
+
+                {onAddComment && (
+                  <button
+                    type="button"
+                    onClick={onAddComment}
+                    className="mt-4 py-2 px-4 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                  >
+                    Ajouter un commentaire
+                  </button>
+                )}
+              </>
             )}
           </div>
         </div>

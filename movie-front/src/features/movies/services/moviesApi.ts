@@ -17,10 +17,8 @@ export const moviesApi = {
   },
 
   async getMovieById(id: number): Promise<MovieDetail> {
-    const response = await api.get<MovieDetail>(
-      `/movies/${id}`
-    );
-    return response.data;
+    const response = await api.get<{ data: MovieDetail }>(`/movies/${id}`);
+    return response.data.data;
   },
 
   async rateMovie(id: number, data: RateMovieRequest): Promise<{ message: string, movie_id: number }> {

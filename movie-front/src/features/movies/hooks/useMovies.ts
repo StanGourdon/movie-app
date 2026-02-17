@@ -49,39 +49,55 @@ export const useMovies = (initialPage: number = 1): UseMoviesReturn => {
 };
 
 interface UseMovieDetailReturn {
-  movie: MovieDetail | null;
-  loading: boolean;
-  error: string | null;
-  fetchMovie: () => Promise<void>;
+  fullMovie: MovieDetail | null;
+  loadingDetail: boolean;
+  errorDetail: string | null;
+  selectMovie: (id: number) => Promise<void>;
+  clearSelection: () => void;
 }
 
-export const useMovieDetail = (movieId: number): UseMovieDetailReturn => {
-  const [movie, setMovie] = useState<MovieDetail | null>(null);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
+/**
+ * Gestion du chargement des détails d'un film.
+ * - Chargement uniquement à l'ouverture
+ * - Pas de rechargement si on ré-ouvre le même film
+ */
+export const useMovieDetail = (): UseMovieDetailReturn => {
+  const [fullMovie, setFullMovie] = useState<MovieDetail | null>(null);
+  const [loadingDetail, setLoadingDetail] = useState<boolean>(false);
+  const [errorDetail, setErrorDetail] = useState<string | null>(null);
 
-  const fetchMovie = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await moviesApi.getMovieById(movieId);
-      setMovie(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Erreur lors du chargement du film');
-      setMovie(null);
-    } finally {
-      setLoading(false);
+  const selectMovie = useCallback(async (id: number) => {
+    // Si on a déjà les détails pour ce film, ne pas recharger
+    if (fullMovie && fullMovie.id === id) {
+      return;
     }
-  }, [movieId]);
 
-  useEffect(() => {
-    fetchMovie();
-  }, [fetchMovie]);
+    try {
+      setLoadingDetail(true);
+      setErrorDetail(null);
+      const data = await moviesApi.getMovieById(id);
+      setFullMovie(data);
+    } catch (err) {
+      setErrorDetail(
+        err instanceof Error ? err.message : 'Erreur lors du chargement du film'
+      );
+      setFullMovie(null);
+    } finally {
+      setLoadingDetail(false);
+    }
+  }, [fullMovie]);
+
+  const clearSelection = useCallback(() => {
+    // On garde fullMovie en mémoire pour éviter un rechargement immédiat
+    // si l'utilisateur rouvre le même film. On ne remet donc pas fullMovie à null ici.
+    setErrorDetail(null);
+  }, []);
 
   return {
-    movie,
-    loading,
-    error,
-    fetchMovie,
+    fullMovie,
+    loadingDetail,
+    errorDetail,
+    selectMovie,
+    clearSelection,
   };
 };
