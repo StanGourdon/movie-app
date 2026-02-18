@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Movie } from '../types/movie.types';
 import { MovieCard } from './MovieCard';
 import { MovieDetailModal } from './MovieDetailModal';
 import { AddCommentModal } from './AddCommentModal';
 import { useMovieDetail } from '../hooks/useMovies';
+import { moviesApi } from '../services/moviesApi';
 
 export interface MovieGridProps {
   movies: Movie[];
@@ -18,10 +19,30 @@ export const MovieGrid = ({
   lastPage = 1,
   onPageChange,
 }: MovieGridProps) => {
+  const [localMovies, setLocalMovies] = useState<Movie[]>(movies);
   const [selectedMovie, setSelectedMovie] = useState<Movie | null>(null);
   const [isAddCommentOpen, setIsAddCommentOpen] = useState(false);
 
   const { fullMovie, loadingDetail, selectMovie, refreshMovie, clearSelection } = useMovieDetail();
+
+  useEffect(() => {
+    setLocalMovies(movies);
+  }, [movies]);
+
+  const handleToggleLike = async (movieId: number) => {
+    try {
+      const { liked } = await moviesApi.toggleLike(movieId);
+      setLocalMovies((prev) =>
+        prev.map((m) =>
+          m.id === movieId
+            ? { ...m, is_liked: liked, likes_count: m.likes_count + (liked ? 1 : -1) }
+            : m
+        )
+      );
+    } catch {
+      // silently ignore – the UI stays unchanged
+    }
+  };
 
   const openDetail = (movie: Movie) => {
     setSelectedMovie(movie);
@@ -42,11 +63,12 @@ export const MovieGrid = ({
   return (
     <>
       <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 py-6">
-        {movies.map((movie) => (
+        {localMovies.map((movie) => (
           <MovieCard
             key={movie.id}
             movie={movie}
             onSelect={() => openDetail(movie)}
+            onToggleLike={() => void handleToggleLike(movie.id)}
           />
         ))}
       </div>

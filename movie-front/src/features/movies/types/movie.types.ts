@@ -4,6 +4,8 @@ export interface Movie {
   release_date: string | null;
   poster_url: string | null;
   average_rating: number;
+  is_liked: boolean;
+  likes_count: number;
 }
 
 export interface MovieDetail extends Movie {

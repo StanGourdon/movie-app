@@ -15,3 +15,4 @@ Route::middleware('auth:sanctum')->get('user', function (Request $request) {
 
 Route::apiResource('movies', MovieController::class)->only(['index', 'show']);
 Route::post('movies/{movie}/rate', [MovieController::class, 'rate'])->name('movies.rate')->middleware('auth:sanctum');
+Route::post('movies/{movie}/like', [MovieController::class, 'toggleLike'])->name('movies.like')->middleware('auth:sanctum');

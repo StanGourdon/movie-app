@@ -20,6 +20,8 @@ class MovieResource extends JsonResource
             'release_date' => $this->release_date?->format('Y-m-d'),
             'poster_url' => $this->img_url,
             'average_rating' => round((float) ($this->stars_avg_rating ?? 0), 1),
+            'likes_count' => (int) ($this->likes_count ?? 0),
+            'is_liked' => (bool) ($this->is_liked ?? false),
         ];
     }
 }

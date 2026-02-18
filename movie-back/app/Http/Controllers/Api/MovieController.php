@@ -7,6 +7,7 @@ use App\Http\Requests\Api\RateMovieRequest;
 use App\Http\Resources\Api\MovieDetailResource;
 use App\Http\Resources\Api\MovieResource;
 use App\Models\Comment;
+use App\Models\Like;
 use App\Models\Movie;
 use App\Models\Star;
 use Illuminate\Http\JsonResponse;
@@ -20,10 +21,16 @@ class MovieController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $movies = Movie::query()
+        $query = Movie::query()
             ->withAvg('stars', 'rating')
-            ->orderBy('release_date', 'desc')
-            ->paginate(15);
+            ->withCount('likes')
+            ->orderBy('release_date', 'desc');
+
+        if ($user = $request->user()) {
+            $query->withExists(['likes as is_liked' => fn ($q) => $q->where('user_id', $user->id)]);
+        }
+
+        $movies = $query->paginate(15);
 
         return MovieResource::collection($movies)
             ->response()
@@ -76,5 +83,30 @@ class MovieController extends Controller
             'message' => 'Rating saved successfully.',
             'movie_id' => $movie->id,
         ], 201);
+    }
+
+    /**
+     * Toggle like on a movie.
+     * POST /api/movies/{id}/like
+     */
+    public function toggleLike(Request $request, Movie $movie): JsonResponse
+    {
+        $user = $request->user();
+
+        $like = Like::where('user_id', $user->id)
+            ->where('movie_id', $movie->id)
+            ->first();
+
+        if ($like) {
+            $like->delete();
+            return response()->json(['liked' => false], 200);
+        }
+
+        Like::create([
+            'user_id' => $user->id,
+            'movie_id' => $movie->id,
+        ]);
+
+        return response()->json(['liked' => true], 201);
     }
 }

@@ -1,4 +1,6 @@
+import { Heart } from 'lucide-react';
 import type { Movie } from '../types/movie.types';
+import { useAuth } from '../../auth/hooks/useAuth';
 
 const MAX_STARS = 5;
 
@@ -22,17 +24,40 @@ function StarRating({ rating }: { rating: number }) {
 export interface MovieCardProps {
   movie: Movie;
   onSelect: () => void;
+  onToggleLike?: () => void;
 }
 
-export const MovieCard = ({ movie, onSelect }: MovieCardProps) => {
+export const MovieCard = ({ movie, onSelect, onToggleLike }: MovieCardProps) => {
+  const { isAuthenticated } = useAuth();
+  const authenticated = isAuthenticated();
+
   return (
     <article className="bg-white/95 rounded-lg shadow-md overflow-hidden flex flex-col">
-      <div className="aspect-[2/3] bg-gray-200 overflow-hidden">
+      <div className="relative aspect-[2/3] bg-gray-200 overflow-hidden">
         <img
           src={movie.poster_url ?? 'https://via.placeholder.com/300x450?text=No+poster'}
           alt={`Affiche de ${movie.title}`}
           className="w-full h-full object-cover"
         />
+        {authenticated && onToggleLike && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleLike();
+            }}
+            className="absolute top-2 right-2 rounded-full bg-black/30 p-1.5 backdrop-blur-sm transition-colors hover:bg-black/50"
+            aria-label={movie.is_liked ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+          >
+            <Heart
+              className={`h-5 w-5 transition-colors ${
+                movie.is_liked
+                  ? 'fill-red-500 text-red-500'
+                  : 'fill-none text-white'
+              }`}
+            />
+          </button>
+        )}
       </div>
       <div className="p-3 flex flex-col flex-1">
         <h3 className="font-semibold text-gray-900 line-clamp-2 min-h-10">

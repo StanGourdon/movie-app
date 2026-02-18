@@ -28,4 +28,9 @@ export const moviesApi = {
     const response = await api.post<RateMovieResponse>(`/movies/${movieId}/rate`, payload);
     return response.data;
   },
+
+  async toggleLike(movieId: number): Promise<{ liked: boolean }> {
+    const response = await api.post<{ liked: boolean }>(`/movies/${movieId}/like`);
+    return response.data;
+  },
 }
