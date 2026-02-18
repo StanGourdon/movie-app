@@ -41,7 +41,7 @@ export const MovieGrid = ({
 
   return (
     <>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 py-6">
+      <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 py-6">
         {movies.map((movie) => (
           <MovieCard
             key={movie.id}
