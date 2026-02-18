@@ -1,59 +1,179 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Movie Back – Laravel 12 + Sanctum
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Backend API Laravel pour l’application **Movie App** : films Disney, notes/commentaires, authentification Sanctum.
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🚀 Installation
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+```bash
+cd movie-back
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+# Installer les dépendances PHP
+composer install
 
-## Learning Laravel
+# Installer les assets front Laravel si nécessaire
+npm install
+```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## ⚙️ Configuration
 
-## Laravel Sponsors
+1. Copier le fichier d’environnement :
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```bash
+cp .env.example .env
+```
 
-### Premium Partners
+2. Générer la clé d’application :
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```bash
+php artisan key:generate
+```
 
-## Contributing
+3. Configurer la connexion à la base de données dans `.env` :
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=movie_app
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-## Code of Conduct
+4. (Optionnel) Configurer TMDB dans `config/services.php` et `.env` :
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```env
+TMDB_BEARER_TOKEN=xxxxxxxx
+TMDB_BASE_URL=https://api.themoviedb.org/3
+TMDB_POSTER_PATH=https://image.tmdb.org/t/p/
+TMDB_POSTER_SIZE=w500
+```
 
-## Security Vulnerabilities
+---
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+## 🗄️ Migrations & seeds
 
-## License
+```bash
+# Exécuter les migrations
+php artisan migrate
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+# (Optionnel) Seed de base
+php artisan db:seed
+```
+
+Tables principales :
+- `users` : utilisateurs (auth Sanctum).
+- `movies` : films importés de TMDB (`tmdb_id`, `title`, `description`, `release_date`, `img_url`).
+- `comments`, `likes`, `stars` : commentaires, likes, notes (1–5) associés aux films.
+- `personal_access_tokens` : tokens Sanctum.
+
+---
+
+## 🌐 Démarrer le serveur
+
+```bash
+php artisan serve
+```
+
+L’API sera accessible sur `http://localhost:8000/api` (à faire correspondre avec `VITE_API_BASE_URL` côté front).
+
+---
+
+## 🏗️ Structure du backend
+
+La structure complète est décrite dans [`STRUCTURE.md`](STRUCTURE.md).
+
+Résumé :
+
+- **app/Http/Controllers/Api/**
+  - `AuthController` : `login`, `register`, `logout` (Sanctum).
+  - `MovieController` : `index` (liste paginée), `show` (détail), `rate` (notation + commentaire).
+- **app/Http/Requests/Api/**
+  - `RateMovieRequest` : validation `{ rating: number, comment?: string }`.
+- **app/Http/Resources/Api/**
+  - `MovieResource`, `MovieDetailResource`, `CommentResource`, `StarResource`.
+- **app/Models/**
+  - `User`, `Movie`, `Comment`, `Like`, `Star`.
+- **app/Services/**
+  - `TmdbService` : appels à l’API TMDB et transformation des données.
+- **app/Console/Commands/**
+  - `FetchDisneyMoviesCommand` : commande `movies:fetch-disney` pour importer/mettre à jour les films.
+- **routes/**
+  - `api.php` : routes API consommées par le front (auth + films).
+
+---
+
+## 🔌 Endpoints principaux
+
+### Auth (Sanctum)
+
+- `POST /api/login`  
+  Body : `{ email, password }`  
+  Réponse : `{ token, token_type: 'Bearer', user: { id, name, email } }`
+
+- `POST /api/register`  
+  Body : `{ name, email, password }`  
+  Réponse identique à `login`.
+
+- `POST /api/logout` *(auth: sanctum)*  
+  Révoque le token courant.
+
+- `GET /api/user` *(auth: sanctum)*  
+  Retourne l’utilisateur courant.
+
+### Movies
+
+- `GET /api/movies`  
+  Liste paginée de films (via `MovieResource::collection`), avec meta Laravel :
+  ```json
+  {
+    "data": [ { ... } ],
+    "links": { ... },
+    "meta": {
+      "current_page": 1,
+      "last_page": 5,
+      "per_page": 15,
+      "total": 75,
+      ...
+    }
+  }
+  ```
+
+- `GET /api/movies/{id}`  
+  Détail complet d’un film (description, moyenne des notes, commentaires, etc.) via `MovieDetailResource`.
+
+- `POST /api/movies/{id}/rate` *(auth: sanctum)*  
+  Body :
+  ```json
+  { "rating": 4, "comment": "Super film !" }
+  ```  
+  Réponse :
+  ```json
+  { "message": "Rating saved successfully.", "movie_id": 123 }
+  ```
+
+---
+
+## 🎬 Import des films Disney (TMDB)
+
+Pour importer les films Disney Animation depuis TMDB dans la table `movies` :
+
+```bash
+php artisan movies:fetch-disney --pages=10
+```
+
+- Utilise `TmdbService` pour appeler TMDB.
+- Upsert dans `movies` sur la clé `tmdb_id`.
+
+---
+
+## 🔗 Intégration avec le front
+
+- Le front (`movie-front`) consomme :
+  - `GET /api/movies` + `GET /api/movies/{id}` pour la liste + détail.
+  - `POST /api/movies/{id}/rate` pour la notation/commentaire (après login/register).
+  - `POST /api/login`, `POST /api/register`, `POST /api/logout`, `GET /api/user` pour l’auth.
+- Le token Sanctum est stocké côté front dans `localStorage` (`auth_token`) et envoyé via l’en-tête `Authorization: Bearer <token>`.

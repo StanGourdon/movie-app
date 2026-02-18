@@ -46,7 +46,7 @@ npm run build
 npm run preview
 ```
 
-## 🏗️ Structure du projet
+## 🏗️ Structure du projet [STRUCTURE.md](STRUCTURE)
 
 ```
 src/

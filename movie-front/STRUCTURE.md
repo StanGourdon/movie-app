@@ -1,3 +1,5 @@
+## 🏗️ Structure du projet
+
 # Arborescence `/src` – React 19 + TypeScript + Vite + Tailwind
 
 Structure **feature-based** avec séparation des domaines **auth** et **movies**. Scalable et maintenable.
